@@ -1,6 +1,8 @@
 bitcoinrpc_password.txt
 temp.raw
 
+*.o
+
 # Created by https://www.gitignore.io
 
 ### Python ###
