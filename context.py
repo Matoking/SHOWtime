@@ -25,6 +25,9 @@ class Screen(object):
     
     VERTICAL = 0
     HORIZONTAL = 1
+    
+    WIDTH = 320
+    HEIGHT = 240
 
 class ScreenContext:
     def __init__(self, port_name):
@@ -36,6 +39,10 @@ class ScreenContext:
         # Current text size
         self.text_size = 2
         self.orientation = Screen.HORIZONTAL
+        
+        # Current colors
+        self.current_fg_color = Screen.WHITE
+        self.current_bg_color = Screen.BLACK
         
         self.characters_on_line = 0
         
@@ -107,24 +114,26 @@ class ScreenContext:
         Returns the amount of columns, depending on the current text size
         """
         if self.orientation == Screen.HORIZONTAL:
-            return 320 / (self.text_size * 6)
+            return Screen.WIDTH / (self.text_size * 6)
         else:
-            return 240 / (self.text_size * 6)
+            return Screen.HEIGHT / (self.text_size * 6)
     
     def get_rows(self):
         """
         Returns the amount of rows, depending on the current text size
         """
         if self.orientation == Screen.HORIZONTAL:
-            return 240 / (self.text_size * 8)
+            return Screen.HEIGHT / (self.text_size * 8)
         else:
-            return 320 / (self.text_size * 8)
+            return Screen.WIDTH / (self.text_size * 8)
         
     # WRITING FUNCTIONS HERE
     def fg_color(self, color):
         """
         Set foreground/text color to one of seven colors defined in Screen, eg. Screen.CYAN
         """
+        self.current_fg_color = color
+        
         self.buffer += "\e[%s%sm" % (str(Screen.FOREGROUND), str(color))
         self.sleep()
         
@@ -134,6 +143,8 @@ class ScreenContext:
         """
         Set background color to one of seven colors defined in Screen, eg. Screen.CYAN
         """
+        self.current_bg_color = color
+        
         self.buffer += "\e[%s%sm" % (str(Screen.BACKGROUND), str(color))
         self.sleep()
         
@@ -211,6 +222,9 @@ class ScreenContext:
         self.sleep(0.1)
         self.characters_on_line = 0
         
+        # Colors have to be set again after going home otherwise glitches occur
+        self.bg_color(self.current_bg_color).fg_color(self.current_fg_color)
+        
         return self
     
     def erase_screen(self):
@@ -224,7 +238,7 @@ class ScreenContext:
     
     def set_text_size(self, size):
         """
-        Set text size. Font width is then set to 6*size and font height to 8*size
+        Set text size. Font width is set to 6*size and font height to 8*size
         """
         self.buffer += "\e[%ss" % str(size)
         self.text_size = size
@@ -235,7 +249,8 @@ class ScreenContext:
     def set_rotation(self, rotation):
         """
         Set screen rotation. 
-        Accepts values between 0-3, where 1 stands for clockwise 90 degree rotation
+        Accepts values between 0-3, where 1 stands for clockwise 90 degree rotation,
+        2 for 180 degree rotation, etc.
         """
         self.buffer += "\e[%sr" % str(rotation)
         
