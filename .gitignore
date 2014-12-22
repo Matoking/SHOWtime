@@ -1,5 +1,6 @@
 bitcoinrpc_password.txt
 temp.raw
+example.py
 
 *.o
 
