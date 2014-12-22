@@ -20,6 +20,9 @@ using the following command
 If pip hasn't been installed, it can be usually be installed using apt-get as such
 # apt-get install python-pip
 
+Some of the dependencies may need the python-dev package in order to be installed
+# apt-get install python-dev
+
 ====
 3. Run SHOWtime
 ====
