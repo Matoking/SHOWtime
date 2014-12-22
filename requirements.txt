@@ -2,3 +2,5 @@ argparse==1.2.1
 humanfriendly==1.14
 psutil==2.1.3
 python-jsonrpc==0.6.1
+Pillow==2.3.0
+httplib2==0.8
