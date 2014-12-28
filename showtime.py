@@ -25,7 +25,7 @@ parser.add_argument("--port", "-p",
                     type=str, default="/dev/ttyUSB0")
 args = parser.parse_args()
 
-# CONFIGURATION
+# Apply the arguments
 default_tab = args.tab - 1
 tab_change_interval = args.time
 

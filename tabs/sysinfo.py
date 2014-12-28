@@ -21,14 +21,6 @@ class SystemStats(Tab):
         
         self.uptime = 0
         
-        # Change the time units to be shorter in order to make them fit on the screen
-        humanfriendly.time_units = (dict(divider=1, singular='s', plural='s'),
-                                    dict(divider=60, singular='m', plural='m'),
-                                    dict(divider=60*60, singular='h', plural='h'),
-                                    dict(divider=60*60*24, singular='D', plural='D'),
-                                    dict(divider=60*60*24*7, singular='W', plural='W'),
-                                    dict(divider=60*60*24*7*52, singular='Y', plural='Y'))
-        
     def render_tab(self, ctx):
         # Update system info
         self.update_sysinfo()

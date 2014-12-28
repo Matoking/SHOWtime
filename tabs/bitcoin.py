@@ -120,7 +120,11 @@ class Bitcoind(Tab):
                     if self.utx_start_time != -1:
                         self.utx_since_last_block += 1
             
-            self.last_block_time = latest_block['time']
+            # Get the timestamp from the latest block if it's available            
+            if 'time' in latest_block:
+                self.last_block_time = latest_block['time']
+            else:
+                self.last_block_time = int(time.time())
             
             for tx in latest_block['tx']:
                 if tx in self.utx:
@@ -179,6 +183,25 @@ class BitcoinPrice(Tab):
         self.high = 0.0
         self.low = 0.0
         
+        self.price_data = {"source": "Couldn't update price",
+                           "data": {}}
+        
+        # The price sources are checked starting from the first one
+        # until a valid response is received
+        self.price_sources = [{"api_url": "https://api.bitcoinaverage.com/ticker/global/USD/",
+                               "name": "BitcoinAverage",
+                               "data": { "Last": "last",
+                                         "Ask": "ask",
+                                         "Bid": "bid",
+                                         "24h avg": "24h_avg"}},
+                              
+                              {"api_url": "https://www.bitstamp.net/api/ticker/",
+                               "name": "Bitstamp",
+                               "data": { "Last": "last",
+                                         "High": "high",
+                                         "Low": "low",
+                                         "24h avg": "vwap"}},]
+        
         self.UPDATE_INTERVAL = 120
         self.last_update = 0
         
@@ -186,27 +209,44 @@ class BitcoinPrice(Tab):
         current_time = time.time()
         
         if current_time >= self.last_update + 60:
-            # Update value
-            try:
-                response = urllib2.urlopen("https://www.bitstamp.net/api/ticker/").read()
-                response = json.loads(response)
-            except urllib2.URLError, ValueError:
-                # Either the ticker data couldn't be retrieved or JSON couldn't be parsed
-                return
-            
-            self.last = float(response["last"])
-            self.high = float(response["high"])
-            self.low = float(response["low"])
-            
+            # Go through all of the available price sources until we have one that works
+            for source in self.price_sources:
+                try:
+                    print "Updating %s" % source["name"]
+                    response = urllib2.urlopen(source["api_url"]).read()
+                    response = json.loads(response)
+                except:
+                    # Couldn't retrieve ticker data, proceed to next source in the list
+                    print "Couldn't retrieve ticker data from %s, skipping..." % source["name"]
+                    continue
+                
+                self.price_data["source"] = source["name"]
+                self.price_data["data"] = {}
+                
+                for name, key in source["data"].iteritems():
+                    self.price_data["data"][name] = float(response[key])
+                    
+                # Stop updating after the first working result
+                break
+                
             self.last_update = current_time
         
     def render_tab(self, ctx):
         # Update price if it hasn't been updated in the last 10 minutes
         self.update_price()
         
-        ctx.set_text_size(3).bg_color(Screen.BLACK).write("Last ").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.last).linebreak()
+        # Write the source
+        ctx.write_line(self.price_data["source"]).linebreak()
         
-        ctx.fg_color(Screen.WHITE).write("24hr high").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.high)
-        ctx.fg_color(Screen.WHITE).write("24hr low").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.low)
+        ctx.set_text_size(3)
+        
+        # Write the data
+        for entry, value in self.price_data["data"].iteritems():
+            ctx.write_line(entry).fg_color(Screen.YELLOW).write_line("$%.2f" % value).fg_color(Screen.WHITE).linebreak()
+        
+        #ctx.set_text_size(3).bg_color(Screen.BLACK).write("Last ").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.last).linebreak()
+        
+        #ctx.fg_color(Screen.WHITE).write("24hr high").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.high)
+        #ctx.fg_color(Screen.WHITE).write("24hr low").fg_color(Screen.YELLOW).linebreak().write_line("$%.2f" % self.low)
         
         ctx.set_text_size(2)
