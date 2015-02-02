@@ -21,7 +21,5 @@ tabs = [ # Track a running Bitcoin node
          DiskUsage(),
          
          # Tracks website uptime
-         WebsiteUptime({"websites": [ {"name": "BitBin",
-                                       "url": "http://69.172.212.21"},
-                                      {"name": "Google",
+         WebsiteUptime({"websites": [ {"name": "Google",
                                        "url": "http://google.com"} ] })]
