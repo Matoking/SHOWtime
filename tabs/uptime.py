@@ -29,15 +29,14 @@ class WebsiteUptime(Tab):
         
         if current_time >= self.last_update + 60:
             for website in self.websites:
+                # Is the website down?
                 down = False
+                
+                # Try to get a response
+                # If we get an exception assume the site is down
                 try:
                     response = urllib2.urlopen(website["url"], timeout=5)
-                    
-                    if response.getcode() == 200:
-                        down = False
-                    else:
-                        down = True
-                except urllib2.HTTPError:
+                except:
                     down = True
                     
                 if not down:
@@ -61,4 +60,4 @@ class WebsiteUptime(Tab):
             if status:
                 ctx.fg_color(Screen.GREEN).write_line("UP").linebreak()
             else:
-                ctx.fg_color(Screen.RED).write_line("DOWN for %s" % format_timespan(int(time.time() - self.downtime[website])))
+                ctx.fg_color(Screen.RED).write_line("DOWN for %s" % format_timespan(int(time.time() - self.downtime[website]))).linebreak()

@@ -105,10 +105,6 @@ class Bitcoind(Tab):
                 self.last_block_time = latest_block['time']
             else:
                 self.last_block_time = self.utx_start_time
-            
-            for tx in latest_block['tx']:
-                if tx in self.utx:
-                    self.utx.remove(tx)
                     
             # If this is the first time we ever fetched the transactions,
             # set the current time as the starting point for calculating tx/s
