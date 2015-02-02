@@ -19,21 +19,16 @@ class Bitcoind(Tab):
         self.CONNECTION_YELLOW_THRESHOLD = 4
         self.CONNECTION_GREEN_THRESHOLD = 9
         
-        self.TRANSACTION_PURGE_THRESHOLD = 20000
-        
         self.host = config["host"]
         
         self.addrlocal = "N/A"
         
+        self.utx_count_on_block = -1
         self.utx_count = 0
         
         # The time since last block or when we started tracking new transactions
         # (eg. on first tab launch)
         self.utx_start_time = -1
-        
-        self.utx = []
-        
-        self.utx_since_last_block = 0
         
         self.connections = 0
         self.inbound = 0
@@ -80,15 +75,8 @@ class Bitcoind(Tab):
            'error' in latest_block:
             print "Error in response, skipping"
         else:
-            # If there are too many transactions in the memory,
-            # clear the list entirely and start from scratch
-            if len(self.utx) >= self.TRANSACTION_PURGE_THRESHOLD:
-                self.utx = []
-                self.utx_start_time = -1
-                self.utx_since_last_block = 0
-            
             if self.block_count != blockcount:
-                self.utx_since_last_block = 0
+                self.utx_count_on_block = len(utx)
                 
                 if self.utx_start_time != -1:
                     self.utx_start_time = int(time.time())
@@ -112,19 +100,11 @@ class Bitcoind(Tab):
                 
             self.utx_count = len(utx)
             
-            # Add new transactions
-            for tx in utx:
-                if tx not in self.utx:
-                    self.utx.append(tx)
-                    
-                    if self.utx_start_time != -1:
-                        self.utx_since_last_block += 1
-            
             # Get the timestamp from the latest block if it's available            
             if 'time' in latest_block:
                 self.last_block_time = latest_block['time']
             else:
-                self.last_block_time = int(time.time())
+                self.last_block_time = self.utx_start_time
             
             for tx in latest_block['tx']:
                 if tx in self.utx:
@@ -164,7 +144,7 @@ class Bitcoind(Tab):
         time_since_start = current_time - self.utx_start_time
         
         if time_since_start != 0:
-            tx_per_second = float(self.utx_since_last_block) / float(time_since_start)
+            tx_per_second = float(self.utx_count - self.utx_count_on_block) / float(time_since_start)
         else:
             tx_per_second = 0.0
             

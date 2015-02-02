@@ -1,5 +1,6 @@
 from tabs.bitcoin import BitcoinPrice, Bitcoind
 from tabs.sysinfo import SystemStats, DiskUsage
+from tabs.uptime import WebsiteUptime
 
 import os
 
@@ -17,4 +18,8 @@ tabs = [ # Track a running Bitcoin node
          SystemStats(),
          
          # Displays disk usage
-         DiskUsage() ]
+         DiskUsage(),
+         
+         # Tracks website uptime
+         WebsiteUptime({"websites": [ {"name": "Google",
+                                       "url": "http://google.com"} ] })]

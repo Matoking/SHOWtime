@@ -1,4 +1,9 @@
 def format_timespan(seconds):
+    seconds = int(seconds)
+    
+    if seconds == 0:
+        return "0s"
+    
     time_units = ({"divider": 1, "unit": 's'},
                   {"divider": 60, "unit": 'm'},
                   {"divider": 60*60, "unit": 'h'},
