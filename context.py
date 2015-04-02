@@ -193,7 +193,7 @@ class ScreenContext:
         """ 
         buffer_text = text
         
-        empty_line_count = self.get_columns() - len(text) - self.characters_on_line
+        empty_line_count = self.get_columns() - ((len(text) + self.characters_on_line) % self.get_columns())
         
         empty_line = ""
         for i in range(0, empty_line_count):
