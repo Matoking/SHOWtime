@@ -11,7 +11,7 @@ class SystemStats(Tab):
     def __init__(self):
         self.title = "System stats"
         
-        self.cpu_usages = [ 0.5, 0.2, 0.7, 0.1 ]
+        self.cpu_usages = [0.0] * len(psutil.cpu_percent(percpu=True))
         
         self.used_ram = 12505903
         self.total_ram = 20189390
